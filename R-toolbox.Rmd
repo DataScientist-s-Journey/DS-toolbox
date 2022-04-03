@@ -1,9 +1,53 @@
 ---
-title: "R Notebook"
+title: "R Toolbox"
 output: html_notebook
 ---
 
-# R Toolbox
+# Install/Import Libraries
+
+Código para instalar bibliotecas
+
+```{r instalar_libs}
+
+instalar_libs <- function(pacotes)
+{
+  if(sum(as.numeric(!pacotes %in% installed.packages())) != 0)
+  {
+    instalador <- pacotes[!pacotes %in% installed.packages()]
+    
+    for(i in 1:length(instalador))
+    {
+      install.packages(instalador, dependencies = T)
+      break()
+    }
+    
+    sapply(pacotes, require, character = T) 
+  } 
+  else 
+  {
+    sapply(pacotes, require, character = T) 
+  }
+}
+
+pacotes <- c("devtools","ggplot2","dplyr")
+
+
+instalar_libs(pacotes)
+
+```
+
+
+
+# Data Preparation (Data Wrangling)
+
+
+# Modeling (ML Models)
+
+
+# Evaluation (Performance Metrics)
+
+
+# Plots
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
 
