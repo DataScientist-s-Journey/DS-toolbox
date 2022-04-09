@@ -127,3 +127,41 @@ limit 5;
 select s.store_id, sum(p.amount) from payment p, staff s where p.staff_id = s.staff_id group by 1 order by 2 desc limit 5;
 
 # -- How many rentals we have each month?
+select left(r.rental_date, 7), count(*) from rental r group by 1 order by 1;
+
+select concat(year(r.rental_date),"/",month(r.rental_date)) as Month, count(*) from rental r group by 1 order by 1;
+select concat(year(r.rental_date),"/",month(r.rental_date)) as Month, count(r.rental_id) from rental r group by 1 order by 1;
+select left(r.rental_date, 7), min(r.rental_date), max(r.rental_date) from rental r group by 1 limit 5;
+
+select f.title, max(r.rental_date), min(r.rental_date)
+from film f, inventory i, rental r 
+where f.film_id=i.film_id and i.inventory_id=r.inventory_id
+group by 1 order by 2 desc limit 5;
+
+select p.customer_id, sum(p.amount) from payment p group by 1 order by 2 limit 5;
+
+select r.customer_id, max(r.rental_date) from rental r group by 1 order by 2 desc, 1 limit 5;
+
+select concat(c.first_name," ", c.last_name), max(r.rental_date) from rental r, customer c where c.customer_id = r.customer_id group by 1 order by 2 desc, 1 limit 5;
+
+select concat(c.first_name," ", c.last_name) name, max(r.rental_date) "last date" from rental r, customer c group by 1 order by 2 desc, 1 limit 5;
+
+select Left(p.payment_date, 7) month, sum(p.amount) Revenue from payment p group by 1 order by 1;
+
+select concat(c.first_name," ", c.last_name) name, max(r.rental_date) "last date" 
+from rental r, customer c where r.customer_id = c.customer_id and year(r.rental_date) < 2006 
+group by 1 order by 2, 1 limit 5;
+
+
+select concat(c.first_name," ", c.last_name) name, max(r.rental_date) "last date" 
+from rental r, customer c where r.customer_id = c.customer_id and r.rental_date < '20050823'  
+group by 1 order by 2, 1;
+
+select concat(c.first_name," ", c.last_name) name, any_value(c.email), max(r.rental_date) "last date" 
+from rental r, customer c where r.customer_id = c.customer_id and year(r.rental_date) < 2006 group by 1 order by 2, 1;
+
+select left(r.rental_date) month, count(r.rental_id) rentals, count(r.customer_id) renters, count(r.rental_id)/count(r.customer_id) rentals_per_renter
+from rental r group by 1 order by 1 limit 10;
+
+select left(r.rental_date, 7) month, count(r.rental_id) rentals, count(distinct r.customer_id) renters, count(r.rental_id)/count(distinct r.customer_id) rentals_per_renter
+from rental r group by 1 order by 1 limit 10;
