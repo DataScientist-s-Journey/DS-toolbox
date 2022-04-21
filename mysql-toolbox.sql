@@ -51,6 +51,8 @@ and f.language_id=l.language_id
 order by 1 
 limit 100;
 
+# -- Group by
+# -- Group by + Count Function
 #How many time a movie has been rented (sakila db)
 select f.title, count(r.rental_id)
 from film f, rental r, inventory i
@@ -58,6 +60,7 @@ where r.inventory_id = i.inventory_id and i.film_id = f.film_id
 group by 1
 limit 10;
 
+# -- Group by + Count Function + Order by
 #How Many Times Each Movie Has Been Rented Out
 select f.title, count(r.rental_id)
 from film f, rental r, inventory i
@@ -163,5 +166,108 @@ from rental r, customer c where r.customer_id = c.customer_id and year(r.rental_
 select left(r.rental_date) month, count(r.rental_id) rentals, count(r.customer_id) renters, count(r.rental_id)/count(r.customer_id) rentals_per_renter
 from rental r group by 1 order by 1 limit 10;
 
+# -- Count + Distinct
 select left(r.rental_date, 7) month, count(r.rental_id) rentals, count(distinct r.customer_id) renters, count(r.rental_id)/count(distinct r.customer_id) rentals_per_renter
 from rental r group by 1 order by 1 limit 10;
+
+# -- The number of distinct films rented each month
+select left(r.rental_date, 7) month, count(distinct i.film_id)
+from rental r, inventory i where r.inventory_id=i.inventory_id
+group by 1 order by 1 limit 5;
+
+select left(r.rental_date, 7) month, count(distinct i.film_id), count(i.film_id)/count(distinct i.film_id)
+from rental r, inventory i where r.inventory_id=i.inventory_id
+group by 1 order by 1 limit 5;
+
+# -- in() Function
+# -- Rented Movies per Category
+select k.name, count(r.rental_id) from category k, inventory i, film_category fk, rental r
+where k.category_id=fk.category_id and r.inventory_id=i.inventory_id and fk.film_id=i.film_id group by 1;
+
+select k.name category, count(r.rental_id) rented_samples_per_category, count(distinct i.film_id) movies_rented 
+from category k, inventory i, film_category fk, rental r  
+where k.category_id=fk.category_id and r.inventory_id=i.inventory_id and fk.film_id=i.film_id and k.name in("Comedy","Sports", "Family") 
+group by 1;
+
+SELECT
+c.name as category, count(r.rental_id) as num_rentals
+FROM
+rental r, inventory i, film f, film_category fc, category c
+WHERE
+r.inventory_id=i.inventory_id
+AND i.film_id=f.film_id
+AND f.film_id=fc.film_id
+AND fc.category_id=c.category_id
+AND c.name in ("Comedy", "Sports", "Family")
+GROUP BY 1;
+
+# -- +----------+-------------+
+# -- | category | num_rentals |
+# -- +----------+-------------+
+# -- | Comedy   |         941 |
+# -- | Family   |        1096 |
+# -- | Sports   |        1179 |
+# -- +----------+-------------+
+# -- 3 rows in set (0.01 sec)
+
+SELECT c.name as category, count(r.rental_id) as num_rentals 
+FROM rental r, inventory i, film f, film_category fc, category c 
+WHERE r.inventory_id=i.inventory_id AND i.film_id=f.film_id AND f.film_id=fc.film_id AND fc.category_id=c.category_id 
+AND c.name not in ("Comedy", "Sports", "Family") 
+GROUP BY 1;
+
+# -- comparison operators (<,>,=,<=,>=,!=,<>)
+
+SELECT
+c.name as category, count(r.rental_id) as num_rentals
+FROM
+rental r, inventory i, film f, film_category fc, category c
+WHERE
+r.inventory_id=i.inventory_id
+AND i.film_id=f.film_id
+AND f.film_id=fc.film_id
+AND fc.category_id=c.category_id
+AND c.name != "Comedy"
+GROUP BY 1;
+
+SELECT
+c.name as category, count(r.rental_id) as num_rentals
+FROM
+rental r, inventory i, film f, film_category fc, category c
+WHERE
+r.inventory_id=i.inventory_id
+AND i.film_id=f.film_id
+AND f.film_id=fc.film_id
+AND fc.category_id=c.category_id
+AND c.name <> "Family"
+GROUP BY 1;
+
+# -- Having 
+# -- Having is like where but is applied like a filter after obtain the output
+# -- Other difference is that where don't allow you to use functions
+select 
+    r.customer_id, count(r.rental_id)
+from 
+    rental r
+group by 1
+having
+    count(r.rental_id)<20
+order by 2 limit 5;
+
+select r.customer_id, concat(c.first_name," ", c.last_name), count(r.rental_id)
+from rental r, customer c where c.customer_id=r.customer_id 
+group by 1 having count(r.rental_id)<20 order by 3 limit 5;
+
+# -- +-------------+---------------------------------------+--------------------+
+# -- | customer_id | concat(c.first_name," ", c.last_name) | count(r.rental_id) |
+# -- +-------------+---------------------------------------+--------------------+
+# -- |         318 | BRIAN WYMAN                           |                 12 |
+# -- |          61 | KATHERINE RIVERA                      |                 14 |
+# -- |         110 | TIFFANY JORDAN                        |                 14 |
+# -- |         281 | LEONA OBRIEN                          |                 14 |
+# -- |         136 | ANITA MORALES                         |                 15 |
+# -- +-------------+---------------------------------------+--------------------+
+# -- 5 rows in set (0.02 sec)
+
+# -- How much revenue has one single store made over PG-13 and R-Rated films?
+# -- select 
