@@ -472,3 +472,92 @@ select r.customer_id, c.email, a.phone, c.active
 |          64 | JUDITH.COX@sakilacustomer.org    | NULL  |      0 |
 +-------------+----------------------------------+-------+--------+
 5 rows in set (0.01 sec)
+
+# -- Cohort Analysis
+select
+    p.customer_id,
+    left(min(p.payment_date), 7) as cohort
+from
+    payment p
+group by 1;
+
+
+# -- Monthly Revenue by Cohort
+select
+    c.cohort,
+    left(p.payment_date, 7) as month_of_revenue,
+    sum(p.amount) as revenue_in_month
+from
+    (
+        select
+            p.customer_id,
+            left(min(p.payment_date), 7) as cohort
+        from
+            payment p
+        group by 1
+    ) c
+    join payment p
+        on c.customer_id = p.customer_id
+group by
+    1, 2
+order by
+    1, 2;
+
+# -- extract dates
+select
+    c.cohort,
+    extract(year_month from p.payment_date) as month_of_revenue,
+    sum(p.amount) as revenue_in_month
+from
+    (
+        select
+            p.customer_id,
+            extract(year_month from min(p.payment_date)) as cohort
+        from
+            payment p
+        group by 1
+    ) c
+    join payment p
+        on c.customer_id = p.customer_id
+group by
+    1, 2
+order by
+    1, 2;
+
+# -- substractiong dates period_date
+select
+    c.cohort,
+    period_diff(extract(year_month from p.payment_date), c.cohort) as rel_month_of_revenue,
+    sum(p.amount) as revenue_in_month
+from
+    (
+        select
+            p.customer_id,
+            extract(year_month from min(p.payment_date)) as cohort
+        from
+            payment p
+        group by 1
+    ) c
+    join payment p
+        on c.customer_id = p.customer_id
+group by
+    1, 2
+order by
+    1, 2;
+
+
+
+
+select
+
+from
+
+where
+
+group by
+
+order by
+
+having
+
+limit 
